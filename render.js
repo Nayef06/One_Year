@@ -1,6 +1,13 @@
 // render.js
 const fs = require("fs");
-const { createCanvas } = require("canvas");
+const path = require("path");
+const { createCanvas, registerFont } = require("canvas");
+
+try {
+  registerFont(path.join(__dirname, "RobotoMono-Regular.ttf"), { family: "MyRoboto" });
+} catch (e) {
+  console.warn("Could not register font:", e.message);
+}
 
 // === RESOLUTION ===
 const W = 1179;
@@ -75,6 +82,38 @@ function renderWallpaper(dayNumber, totalDays) {
       ctx.fillStyle = idx <= day ? DONE : TODO;
       ctx.fill();
     }
+  }
+
+  // === DAYS LEFT TEXT ===
+  const showText = false;;
+
+  if (showText) {
+    const daysLeft = totalDays - day;
+    const daysText = " days left";
+    const numText = daysLeft.toString();
+
+    ctx.font = "40px MyRoboto, Consolas, monospace";
+
+    // Calculate text widths
+    const numWidth = ctx.measureText(numText).width;
+    const textWidth = ctx.measureText(daysText).width;
+
+    // Position: Bottom Right of the SAFE AREA
+    // The grid ends at H - BOTTOM_SAFE.
+    // We want to align with the right side of the grid (W - SIDE_PAD).
+
+    const textX = W - SIDE_PAD - textWidth + 10;
+    const textY = H - BOTTOM_SAFE + 10; // Sits on the bottom line of the safe area
+
+    const numX = textX - numWidth;
+
+    // Draw "days left"
+    ctx.fillStyle = "#2F2F2F";
+    ctx.fillText(daysText, textX, textY);
+
+    // Draw number
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(numText, numX, textY);
   }
 
   return canvas;
